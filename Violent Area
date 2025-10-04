@@ -1,5 +1,5 @@
 local Translations = {
-    ["77wiki"] = "77维基",
+    ["77wiki"] = "暴力区脚本",
     ["Search"] = "搜索",
     ["Main"] = "主菜单",
     ["Player"] = "玩家",
@@ -49,15 +49,18 @@ local Translations = {
     ["Name ESP"] = "名字高亮",
     ["Generator ESP"] = "发电机高亮",
     ["Pallet ESP"] = "木板高亮",
-    ["Vault ESP"] = "翻越点高亮",
-    ["Hook ESP"] = "钩子高亮",
+    ["Vault ESP"] = "越障高亮",
+    ["Hook ESP"] = "挂钩高亮",
     ["Universal"] = "通用",
     ["Fly"] = "飞行",
     ["Noclip"] = "穿墙",
     ["Toggle"] = "切换",
     ["Lock"] = "锁定",
     ["Violence District v5.7"] = "暴力街区 v5.7",
-    ["Emotes"] = "表情"
+    ["Emotes"] = "表情",
+    ["vault"] = "越障",
+    ["hook"] = "挂钩",
+    ["pallet"] = "木板",
 }
 
 local function translateText(text)
