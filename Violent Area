@@ -1,0 +1,158 @@
+local Translations = {
+    ["77wiki"] = "77维基",
+    ["Search"] = "搜索",
+    ["Main"] = "主菜单",
+    ["Player"] = "玩家",
+    ["Others"] = "其他",
+    ["Miscellanous"] = "杂项",
+    ["Immune Horizontal Slash"] = "免疫横斩",
+    ["Be Able To Jump"] = "允许跳跃",
+    ["Disable Jump Cooldown"] = "禁用跳跃冷却",
+    ["Dash Step (Q)"] = "冲刺步 (Q)",
+    ["Fullbright"] = "全亮",
+    ["Remove Gate"] = "移除大门",
+    ["Items"] = "物品",
+    ["Keybinds Are Allowed"] = "允许按键绑定",
+    ["Use Gate Ability No CD (G)"] = "无冷却使用大门能力 (G)",
+    ["Use Shadow Clone No CD (N)"] = "无冷却使用影分身 (N)",
+    ["Use Parrying Dagger No CD (H)"] = "无冷却使用格挡匕首 (H)",
+    ["Ultra Instinct"] = "自在极意功",
+    ["Disable Parry Animation"] = "禁用格挡动画",
+    ["Fake Parry (R)"] = "假格挡 (R)",
+    ["Gun & Flashlight Aimbot"] = "枪械与手电筒自瞄",
+    ["Select Emote"] = "选择表情",
+    ["The Dab"] = " dap 舞",
+    ["Play Emote"] = "播放表情",
+    ["Camera"] = "相机",
+    ["Set FOV"] = "设置视野",
+    ["Field Of View"] = "视野范围",
+    ["Killer"] = "杀手",
+    ["Modded Speed"] = "修改速度",
+    ["Walkspeed"] = "行走速度",
+    ["Disable Flashlight"] = "禁用手电筒",
+    ["Stud Based Aimbot"] = "基于单位自瞄",
+    ["Lock Distance"] = "锁定距离",
+    ["Survivor"] = "幸存者",
+    ["Perfect Generator Repair"] = "完美修理发电机",
+    ["Disable Generator Minigame"] = "禁用发电机小游戏",
+    ["Disable Heal Minigame"] = "禁用治疗小游戏",
+    ["Invisible (Use Noclip)"] = "隐形 (使用穿墙)",
+    ["Speed Multiplier"] = "速度倍率",
+    ["Boosting The Speed By"] = "速度提升",
+    ["Fling"] = "抛射",
+    ["Fling Aura"] = "抛射光环",
+    ["Anti-Fling"] = "反抛射",
+    ["Safezone"] = "安全区",
+    ["Teleport To Lobby"] = "传送至大厅",
+    ["Visuals"] = "视觉",
+    ["Player ESP"] = "玩家高亮",
+    ["Name ESP"] = "名字高亮",
+    ["Generator ESP"] = "发电机高亮",
+    ["Pallet ESP"] = "木板高亮",
+    ["Vault ESP"] = "翻越点高亮",
+    ["Hook ESP"] = "钩子高亮",
+    ["Universal"] = "通用",
+    ["Fly"] = "飞行",
+    ["Noclip"] = "穿墙",
+    ["Toggle"] = "切换",
+    ["Lock"] = "锁定",
+    ["Violence District v5.7"] = "暴力街区 v5.7",
+    ["Emotes"] = "表情"
+}
+
+local function translateText(text)
+    if not text or type(text) ~= "string" then return text end
+    if Translations[text] then return Translations[text] end
+    for en, cn in pairs(Translations) do
+        if text:find(en) then return text:gsub(en, cn) end
+    end
+    return text
+end
+
+local function setupTranslationEngine()
+    local success, err = pcall(function()
+        local oldIndex = getrawmetatable(game).__newindex
+        setreadonly(getrawmetatable(game), false)
+        getrawmetatable(game).__newindex = newcclosure(function(t, k, v)
+            if (t:IsA("TextLabel") or t:IsA("TextButton") or t:IsA("TextBox")) and k == "Text" then
+                v = translateText(tostring(v))
+            end
+            return oldIndex(t, k, v)
+        end)
+        setreadonly(getrawmetatable(game), true)
+    end)
+    if not success then
+        warn("元表劫持失败:", err)
+        local translated = {}
+        local function scanAndTranslate()
+            for _, gui in ipairs(game:GetService("CoreGui"):GetDescendants()) do
+                if (gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox")) and not translated[gui] then
+                    pcall(function()
+                        local text = gui.Text
+                        if text and text ~= "" then
+                            local translatedText = translateText(text)
+                            if translatedText ~= text then
+                                gui.Text = translatedText
+                                translated[gui] = true
+                            end
+                        end
+                    end)
+                end
+            end
+            local player = game:GetService("Players").LocalPlayer
+            if player and player:FindFirstChild("PlayerGui") then
+                for _, gui in ipairs(player.PlayerGui:GetDescendants()) do
+                    if (gui:IsA("TextLabel") or gui:IsA("TextButton") or gui:IsA("TextBox")) and not translated[gui] then
+                        pcall(function()
+                            local text = gui.Text
+                            if text and text ~= "" then
+                                local translatedText = translateText(text)
+                                if translatedText ~= text then
+                                    gui.Text = translatedText
+                                    translated[gui] = true
+                                end
+                            end
+                        end)
+                    end
+                end
+            end
+        end
+        local function setupDescendantListener(parent)
+            parent.DescendantAdded:Connect(function(descendant)
+                if descendant:IsA("TextLabel") or descendant:IsA("TextButton") or descendant:IsA("TextBox") then
+                    task.wait(0.1)
+                    pcall(function()
+                        local text = descendant.Text
+                        if text and text ~= "" then
+                            local translatedText = translateText(text)
+                            if translatedText ~= text then
+                                descendant.Text = translatedText
+                            end
+                        end
+                    end)
+                end
+            end)
+        end
+        pcall(setupDescendantListener, game:GetService("CoreGui"))
+        local player = game:GetService("Players").LocalPlayer
+        if player and player:FindFirstChild("PlayerGui") then
+            pcall(setupDescendantListener, player.PlayerGui)
+        end
+        while true do
+            scanAndTranslate()
+            task.wait(3)
+        end
+    end
+end
+
+task.wait(2)
+setupTranslationEngine()
+
+local success, err = pcall(function()
+    getgenv().key = "https://discord.gg/SRG7QTvEuR"
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/areyourealforme/77wiki/refs/heads/main/violencedistrict.lua"))()
+end)
+
+if not success then
+    warn("加载失败:", err)
+end
