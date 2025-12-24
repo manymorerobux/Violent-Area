@@ -61,7 +61,7 @@ local Translations = {
     ["Emotes"] = "表情",
     ["vault"] = "越障",
     ["hook"] = "挂钩",
-    ["pallet"] = "木板",
+    ["pallet"] = "木板"
 }
 
 local function translateText(text)
